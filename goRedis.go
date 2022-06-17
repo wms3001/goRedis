@@ -88,12 +88,10 @@ func (goRedis *GoRedis) Publish(channel string, message string) *Resp {
 
 func (goRedis *GoRedis) Subscribe(channel string) *Resp {
 	ctx := context.Background()
-	pubsub := goRedis.Client.Subscribe(ctx, channel)
+	goRedis.Client.Subscribe(ctx, channel)
 	var resp = &Resp{}
 	resp.Code = 1
 	resp.Message = "ok"
-	resp.PubSub = pubsub
-	resp.Ctx = &ctx
 	return resp
 }
 
@@ -101,6 +99,18 @@ func (goRedis *GoRedis) CloseSub(pubSub *redis.PubSub) {
 	pubSub.Close()
 }
 
-func Tt() {
-
+func (goRedis *GoRedis) Do(param map[string]interface{}) *Resp {
+	ctx := context.Background()
+	cmd := param["cmd"]
+	rel := goRedis.Client.Do(ctx, cmd)
+	var resp = &Resp{}
+	if rel.Err() != nil {
+		resp.Code = -1
+		resp.Message = rel.Err().Error()
+	} else {
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data = rel
+	}
+	return resp
 }
