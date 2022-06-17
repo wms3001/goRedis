@@ -1,4 +1,4 @@
-module goRedis
+module github.com/wms3001/goRedis
 
 go 1.18
 
