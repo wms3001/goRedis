@@ -52,3 +52,55 @@ func (goRedis *GoRedis) Get(key string) *Resp {
 	}
 	return resp
 }
+
+func (goRedis *GoRedis) Conn(clientName string) *Resp {
+	ctx := context.Background()
+	cn := goRedis.Client.Conn(ctx)
+	defer cn.Close()
+	cn.ClientSetName(ctx, clientName)
+	name, err := cn.ClientGetName(ctx).Result()
+	var resp = &Resp{}
+	if err != nil {
+		resp.Code = -1
+		resp.Message = err.Error()
+	} else {
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data = name
+	}
+	return resp
+}
+
+func (goRedis *GoRedis) Publish(channel string, message string) *Resp {
+	ctx := context.Background()
+	rel := goRedis.Client.Publish(ctx, channel, message)
+	var resp = &Resp{}
+	if rel.Err() != nil {
+		resp.Code = -1
+		resp.Message = rel.Err().Error()
+	} else {
+		resp.Code = 1
+		resp.Message = "ok"
+		resp.Data, _ = rel.Result()
+	}
+	return resp
+}
+
+func (goRedis *GoRedis) Subscribe(channel string) *Resp {
+	ctx := context.Background()
+	pubsub := goRedis.Client.Subscribe(ctx, channel)
+	var resp = &Resp{}
+	resp.Code = 1
+	resp.Message = "ok"
+	resp.PubSub = pubsub
+	resp.Ctx = &ctx
+	return resp
+}
+
+func (goRedis *GoRedis) CloseSub(pubSub *redis.PubSub) {
+	pubSub.Close()
+}
+
+func Tt() {
+
+}
