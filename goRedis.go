@@ -14,13 +14,22 @@ type GoRedis struct {
 	Client   *redis.Client
 }
 
-func (goRedis *GoRedis) Connect() {
+func (goRedis *GoRedis) Connect() *Resp {
 	option := &redis.Options{}
+	var resp = &Resp{}
 	option.Addr = goRedis.Addr
 	option.Password = goRedis.Password
 	option.DB = goRedis.Db
 	rdb := redis.NewClient(option)
 	goRedis.Client = rdb
+	if rdb != nil {
+		resp.Code = 1
+		resp.Message = "connected"
+	} else {
+		resp.Code = 1
+		resp.Message = "connect error"
+	}
+	return resp
 }
 
 func (goRedis *GoRedis) Set(key string, val interface{}, expire time.Duration) *Resp {
